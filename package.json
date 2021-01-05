@@ -1,0 +1,28 @@
+{
+  "name": "tplink-server",
+  "version": "1.0.0",
+  "description": "Ambitious attempt to leverage on [tplink-smarthome-api](https://github.com/plasticrake/tplink-smarthome-api) to manage TP-Link' smart home products.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "gulp dev",
+    "dev:dev": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jhfoo/tplink-server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jhfoo/tplink-server/issues"
+  },
+  "homepage": "https://github.com/jhfoo/tplink-server#readme",
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-eslint": "^6.0.0",
+    "restify": "^8.5.1",
+    "tplink-smarthome-api": "^3.1.0"
+  }
+}
