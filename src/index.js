@@ -16,6 +16,7 @@ let devices = {
   '192.168.88.138': null,
   '192.168.88.139': null,
   '192.168.88.149': null,
+  '192.168.88.200': null,
   },
   isAutoScan = true
 

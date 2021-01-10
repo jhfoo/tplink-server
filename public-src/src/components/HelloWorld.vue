@@ -1,34 +1,59 @@
 <template>
-  <v-container class="pa-0 ma-0" fluid>
-    <v-row class="text-center">
-      <v-col class="col-sm-12 col-md-2">
-      </v-col>
+  <div>
+    <v-container class="pa-0 ma-0" fluid>
+      <v-row>
+        <v-col cols="12" md="2">
+          xx
+        </v-col>
 
-      <v-col class="col-sm-12 col-md-7" >
-        <v-toolbar dark flat dense src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg">
-          <v-toolbar-title>Vuetify</v-toolbar-title>
+        <v-col cols="12" md="7">
+          <v-toolbar dark flat dense src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg">
+            <v-toolbar-title>Vuetify</v-toolbar-title>
 
-          <v-spacer></v-spacer>
-          <v-toolbar-items>
-          </v-toolbar-items>
-            <v-checkbox v-model="FakeLed" disabled class="pt-5"></v-checkbox>
-            <v-switch v-model="isAutoRefresh" @change="onToggleAutoRefresh" label="Auto" color="success" class="pt-5"></v-switch>
-          <v-btn @click="updateDevices(true)" icon :disabled="isAutoRefresh">
-            <v-icon>mdi-refresh</v-icon>
-          </v-btn>
-        </v-toolbar>
-        <v-data-table :headers="TableLabels" :items="devices">
-          <template v-slot:item.actions="{ item }">
-            <v-icon @click="$router.push(`/device/view/${item.host}`)">mdi-file-find-outline</v-icon>
-            <v-icon v-if="item.RelayState !== ''" @click="onToggleOnOff(item)">{{ getRelayIcon(item) }}</v-icon>
-          </template>
-        </v-data-table>
-      </v-col>
+            <v-spacer></v-spacer>
+            <v-toolbar-items>
+            </v-toolbar-items>
+              <v-checkbox v-model="FakeLed" disabled class="pt-5"></v-checkbox>
+              <v-switch v-model="isAutoRefresh" @change="onToggleAutoRefresh" label="Auto" :color="AutoRefreshColor" class="pt-5"></v-switch>
+            <v-btn @click="updateDevices(true)" icon :disabled="isAutoRefresh">
+              <v-icon>mdi-refresh</v-icon>
+            </v-btn>
+          </v-toolbar>
+          <v-data-table :headers="TableLabels" :items="devices">
+            <template v-slot:item.actions="{ item }">
+              <v-icon @click="showDeviceDetail(item)">mdi-file-find-outline</v-icon>
+              <v-icon v-if="item.RelayState !== ''" @click="onToggleOnOff(item)">{{ getRelayIcon(item) }}</v-icon>
+            </template>
+          </v-data-table>
+        </v-col>
 
-      <v-col class="col-sm-12 col-md-3">
-      </v-col>
-    </v-row>
-  </v-container>
+        <v-col cols="12" md="3">
+          xx
+        </v-col>
+      </v-row>
+      </v-container>
+      <v-bottom-sheet v-model="isShowSheet" inset>
+        <v-sheet class="text-center">
+          <v-simple-table fixed-header height="400px">
+              <template v-slot:default>
+                <thead>
+                  <tr>
+                    <th class="text-right">Property</th>
+                    <th class="text-left">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="pair in SelectedDevice" v-bind:key="pair.key">
+                    <td class="text-right">{{ pair.key }}</td>
+                    <td class="text-left">{{ pair.value }}</td>
+                  </tr>
+                </tbody>
+              </template>
+            </v-simple-table>
+          <v-btn class="mt-6" text color="error" @click="isShowSheet = false">close</v-btn>
+        </v-sheet>
+      </v-bottom-sheet>
+  </div>
 </template>
 
 <script>
@@ -45,8 +70,10 @@ const REFRESH_TIMEOUT = 5 * 1000,
       devices: [],
       isAutoRefresh: true,
       RefreshTimer: null,
-      switch1: true,
+      isApiAvail: true,
       FakeLed: true,
+      isShowSheet: false,
+      SelectedDevice: null,
       TableLabels:[
         { text: 'Name', value: 'name' },
         { text: 'Type', value: 'model' },
@@ -62,7 +89,24 @@ const REFRESH_TIMEOUT = 5 * 1000,
       this.isAutoRefresh = false
       this.RefreshTimer = null
     },
+    computed: {
+      AutoRefreshColor() {
+        return this.isApiAvail ? 'success' : 'error'
+      }
+    },
     methods: {
+      showDeviceDetail(device) {
+        this.SelectedDevice = []
+        Object.keys(device).forEach((key) => {
+          this.SelectedDevice.push({
+            key: key,
+            value: device[key]
+          })
+        })
+        console.log(device)
+        console.log(this.SelectedDevice)
+        this.isShowSheet = true
+      },
       getRelayIcon(item) {
         return item.RelayState === RELAY_ON ? 'mdi-lightbulb-on' : 'mdi-lightbulb-outline'
       },
@@ -109,11 +153,13 @@ const REFRESH_TIMEOUT = 5 * 1000,
         axios.get('http://192.168.80.15:8080/api/device/list')
         .then((resp) => {
           this.devices = Object.keys(resp.data).map((key) => {
+            // console.log(resp.data[key])
             let device = {
               host: key,
               model: '',
               name: '',
               RelayState: RELAY_UNKNOWN,
+              LastScan: ''
             }
             if (resp.data[key].err_code === 0) {
               device.status = 'ALIVE'
@@ -124,14 +170,19 @@ const REFRESH_TIMEOUT = 5 * 1000,
               }
               device.model = `${resp.data[key].dev_name} - ${resp.data[key].model}` 
               device.name = resp.data[key].alias
+              device.LastScan = resp.data[key].LastScan
+              device.mac = resp.data[key].mac
+              device.DeviceId = resp.data[key].deviceId
             } else {
               device.status = 'UNKNOWN'
             }
 
+            this.isApiAvail = true
             return device
           })
         })
         .catch((err) => {
+          this.isApiAvail = false
           console.error(err);
         })
         .finally(() => {
