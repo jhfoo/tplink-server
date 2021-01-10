@@ -2,21 +2,9 @@
     <v-app id="app">
       <v-navigation-drawer v-model="drawer" app absolute temporary>
         <v-list nav dense>
-          <v-list-item-group v-model="group" active-class="deep-purple--text text--accent-4">
-            <v-list-item>
-              <v-list-item-title>Foo</v-list-item-title>
-            </v-list-item>
-
-            <v-list-item>
-              <v-list-item-title>Bar</v-list-item-title>
-            </v-list-item>
-
-            <v-list-item>
-              <v-list-item-title>Fizz</v-list-item-title>
-            </v-list-item>
-
-            <v-list-item>
-              <v-list-item-title>Buzz</v-list-item-title>
+          <v-list-item-group v-model="SelectedSidebarList" active-class="deep-purple--text text--accent-4">
+            <v-list-item v-for="item in MainMenu" @click="$router.replace(item.to)" v-bind:key="item.name">
+              <v-list-item-title>{{item.name}}</v-list-item-title>
             </v-list-item>
           </v-list-item-group>
         </v-list>
@@ -28,26 +16,15 @@
         <v-toolbar-title>My files</v-toolbar-title>
 
         <v-spacer></v-spacer>
-
-        <v-btn icon>
-          <v-icon>mdi-magnify</v-icon>
-        </v-btn>
-
-        <v-btn icon>
-          <v-icon>mdi-filter</v-icon>
-        </v-btn>
-
+        <v-toolbar-items class="hidden-sm-and-down">
+          <v-btn v-for="item in MainMenu" @click="$router.replace(item.to)" v-bind:key="item.name">{{item.name}}</v-btn>
+        </v-toolbar-items>
         <v-btn icon>
           <v-icon>mdi-dots-vertical</v-icon>
         </v-btn>
       </v-app-bar>
 
       <v-main>
-        <div id="nav">
-          <router-link to="/">Home</router-link> |
-          <router-link to="/page2">Page 2</router-link> |
-          <router-link to="/about">About</router-link>
-        </div>
         <router-view/>
       </v-main>
 
@@ -80,7 +57,13 @@
     name: 'App',
     data: () => ({
       drawer: false,
+      SelectedSidebarList: 0,
       BottomNav: 'favorites',
+      MainMenu: [
+        { name: 'Home', to: '/'},
+        { name: 'Page 2', to: '/page2'},
+        { name: 'About', to: '/about'},
+      ]
     }),
   }
 </script>
