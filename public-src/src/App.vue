@@ -13,7 +13,7 @@
       <v-app-bar color="deep-purple accent-4" app dark>
         <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
-        <v-toolbar-title>My files</v-toolbar-title>
+        <v-toolbar-title>TP-Link Smart Home Dashboard</v-toolbar-title>
 
         <v-spacer></v-spacer>
         <v-toolbar-items class="hidden-sm-and-down">

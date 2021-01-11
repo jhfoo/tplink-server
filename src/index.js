@@ -132,9 +132,7 @@ server.use(restify.plugins.queryParser({
   mapParams: false 
 }))
 
-server.get('/www/*', restify.plugins.serveStatic({
-  directory: './public',
-  default: 'index.html'
+server.get('/public/*', restify.plugins.serveStaticFiles('./public', {
 }))
 server.get('/api/device/list', deviceList)
 server.get('/api/device/info/:host', respond)
